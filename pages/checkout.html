@@ -97,6 +97,17 @@
           </a>
         </div>
 
+        <div id="orderSuccess" class="text-center py-5 d-none">
+          <i class="fas fa-circle-check fa-3x mb-3" style="color: var(--color-success);" aria-hidden="true"></i>
+          <h2 class="h3 mb-2">Order Placed Successfully!</h2>
+          <p class="text-muted mb-1">Order ID: <strong id="successOrderId">—</strong></p>
+          <p class="text-muted mb-4">Total: <strong id="successOrderTotal">$0.00</strong></p>
+          <p class="mb-4">Thank you for shopping with PetsMart. We'll get your order ready right away.</p>
+          <a href="products.html" class="btn-pet btn-pet-primary">
+            <i class="fas fa-paw" aria-hidden="true"></i> Continue Shopping
+          </a>
+        </div>
+
         <div id="cartWrap" class="row g-4 d-none">
           <div class="col-lg-8">
             <div class="order-card" id="cartItemsCard">
@@ -141,11 +152,8 @@
               </div>
 
               <button type="button" id="placeOrderBtn" class="btn-pet btn-pet-primary w-100 mt-3">
-                <i class="fas fa-lock" aria-hidden="true"></i> Place Order
+                <i class="fas fa-check-circle" aria-hidden="true"></i> Place Order
               </button>
-              <div id="checkoutLoginNotice" class="alert alert-info mt-3 d-none" role="alert">
-                Please <a href="login.html?next=checkout.html">log in</a> to place your order.
-              </div>
             </div>
           </div>
         </div>
@@ -218,6 +226,7 @@
 
       const cartEmpty = document.getElementById('cartEmpty');
       const cartWrap = document.getElementById('cartWrap');
+      const orderSuccess = document.getElementById('orderSuccess');
       const cartItemsList = document.getElementById('cartItemsList');
       const cartItemCount = document.getElementById('cartItemCount');
       const cartSubtotal = document.getElementById('cartSubtotal');
@@ -226,7 +235,6 @@
       const addressInput = document.getElementById('checkoutAddress');
       const paymentSelect = document.getElementById('checkoutPayment');
       const placeOrderBtn = document.getElementById('placeOrderBtn');
-      const loginNotice = document.getElementById('checkoutLoginNotice');
 
       function money(n) {
         return '$' + Number(n || 0).toFixed(2);
@@ -358,15 +366,44 @@
         }
       });
 
-      const isLoggedIn = window.PMAuth && PMAuth.isLoggedIn();
-      if (isLoggedIn && window.PMOrders) {
+      if (window.PMOrders) {
         const user = PMOrders.getCurrentUser();
         if (user && user.address) {
           addressInput.value = user.address;
         }
       }
-      if (!isLoggedIn) {
-        loginNotice.classList.remove('d-none');
+
+      function genOrderId() {
+        const orders = window.PMOrders ? PMOrders.allOrders() : JSON.parse(localStorage.getItem('orders') || '[]');
+        const nums = orders
+          .map(function (o) { return parseInt(String(o.orderId).replace(/\D/g, ''), 10); })
+          .filter(function (n) { return !isNaN(n); });
+        const next = (nums.length ? Math.max.apply(null, nums) : 1000) + 1;
+        return 'ORD' + next;
+      }
+
+      function placeOrder(cart, paymentMethod, address) {
+        const orders = window.PMOrders ? PMOrders.allOrders() : JSON.parse(localStorage.getItem('orders') || '[]');
+        const now = new Date();
+        const total = cart.reduce(function (sum, item) {
+          return sum + (Number(item.price) || 0) * (parseInt(item.quantity, 10) || 1);
+        }, 0);
+        const user = window.PMOrders ? PMOrders.getCurrentUser() : null;
+
+        const order = {
+          orderId: genOrderId(),
+          userId: user ? user.id : 'GUEST',
+          customerName: user ? user.name : 'Guest',
+          products: cart,
+          total: total,
+          paymentMethod: paymentMethod || 'Cash on Delivery',
+          address: address,
+          status: 'Order Placed',
+          orderDate: now.toISOString().slice(0, 10)
+        };
+        orders.push(order);
+        localStorage.setItem('orders', JSON.stringify(orders));
+        return order;
       }
 
       placeOrderBtn.addEventListener('click', function () {
@@ -374,13 +411,6 @@
         if (!cart.length) {
           if (typeof window.pmToast === 'function') {
             window.pmToast('Your cart is empty.', 'danger');
-          }
-          return;
-        }
-        if (!(window.PMAuth && PMAuth.isLoggedIn())) {
-          loginNotice.classList.remove('d-none');
-          if (typeof window.pmToast === 'function') {
-            window.pmToast('Please log in to place your order.', 'danger');
           }
           return;
         }
@@ -392,26 +422,19 @@
           return;
         }
 
-        try {
-          const order = PMOrders.placeOrder({
-            products: cart,
-            paymentMethod: paymentSelect.value,
-            address: addressInput.value.trim()
-          });
-          if (typeof window.pmToast === 'function') {
-            window.pmToast('Order ' + order.orderId + ' placed successfully!', 'success');
-          }
-          if (typeof window.updateCartBadge === 'function') {
-            window.updateCartBadge();
-          }
-          setTimeout(function () {
-            window.location.href = 'my-orders.html?view=orders';
-          }, 1200);
-        } catch (err) {
-          if (typeof window.pmToast === 'function') {
-            window.pmToast(err.message || 'Could not place order.', 'danger');
-          }
+        const order = placeOrder(cart, paymentSelect.value, addressInput.value.trim());
+        setCart([]);
+
+        if (typeof window.pmToast === 'function') {
+          window.pmToast('Order ' + order.orderId + ' placed successfully!', 'success');
         }
+
+        document.getElementById('successOrderId').textContent = order.orderId;
+        document.getElementById('successOrderTotal').textContent = money(order.total);
+        cartEmpty.classList.add('d-none');
+        cartWrap.classList.add('d-none');
+        orderSuccess.classList.remove('d-none');
+        orderSuccess.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
 
       render();
