@@ -294,7 +294,8 @@ ul {
 }
 
 .theme-toggle,
-.rtl-toggle {
+.rtl-toggle,
+.cart-toggle {
   background: none;
   border: 2px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -311,13 +312,15 @@ ul {
 }
 
 .theme-toggle:hover,
-.rtl-toggle:hover {
+.rtl-toggle:hover,
+.cart-toggle:hover {
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
 
 .theme-toggle:hover i,
-.rtl-toggle:hover i {
+.rtl-toggle:hover i,
+.cart-toggle:hover i {
   animation: iconBounce 0.3s ease;
 }
 
