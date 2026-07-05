@@ -1265,4 +1265,34 @@
     });
   }
 
+  /* ---- Newsletter Signup ---- */
+  const newsletterForms = document.querySelectorAll('.newsletter-form');
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  newsletterForms.forEach(function (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const emailInput = form.querySelector('input[type="email"]');
+      const email = emailInput ? emailInput.value.trim() : '';
+
+      if (!email || !emailPattern.test(email)) {
+        if (typeof window.pmToast === 'function') {
+          window.pmToast('Please enter a valid email address.', 'danger');
+        }
+        if (emailInput) {
+          emailInput.focus();
+        }
+        return;
+      }
+
+      if (typeof window.pmToast === 'function') {
+        window.pmToast('Subscribed! Welcome to the PetsMart Pet Lovers Club.', 'success');
+      } else {
+        window.alert('Subscribed! Welcome to the PetsMart Pet Lovers Club.');
+      }
+      form.reset();
+    });
+  });
+
 })();
