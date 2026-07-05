@@ -6,6 +6,26 @@
 (function () {
   'use strict';
 
+  /* ---- Cart Badge ---- */
+  function getCartCount() {
+    var cart = window.PMOrders ? PMOrders.getCart() : JSON.parse(localStorage.getItem('cart') || '[]');
+    return cart.reduce(function (sum, item) {
+      return sum + (parseInt(item.quantity, 10) || 1);
+    }, 0);
+  }
+
+  window.updateCartBadge = function () {
+    const badge = document.getElementById('navCartBadge');
+    if (!badge) {
+      return;
+    }
+    const count = getCartCount();
+    badge.textContent = String(count);
+    badge.classList.toggle('d-none', count === 0);
+  };
+
+  window.updateCartBadge();
+
   /* ---- Dark Mode Toggle ---- */
   const themeToggles = document.querySelectorAll('.theme-toggle');
   const htmlEl = document.documentElement;
@@ -248,7 +268,7 @@
       price: '$25',
       type: 'fish',
       image: '../assets/images/pet-betta-fish.webp',
-      thumbs: ['../assets/images/pet-betta-fish.webp', '../assets/images/product-aquarium-kit.webp', '../assets/images/product-fish-food.webp', '../assets/images/pet-betta-fish.webp'],
+      thumbs: ['../assets/images/pet-betta-fish.webp', '../assets/images/product-aquarium-kit.webp', '../assets/images/product-fish-food.webp'],
       about: 'Splash is an active Betta with bright colour and confident movement, best suited to a filtered, heated tank.',
       personality: 'Alert, curious, and interactive at feeding time.',
       care: 'Keep him in a cycled aquarium with warm water, gentle filtration, and measured feeding.'
@@ -344,7 +364,7 @@
       price: '$35',
       type: 'fish',
       image: '../assets/images/pet-betta-fish.webp',
-      thumbs: ['../assets/images/pet-betta-fish.webp', '../assets/images/product-aquarium-kit.webp', '../assets/images/product-fish-food.webp', '../assets/images/pet-betta-fish.webp'],
+      thumbs: ['../assets/images/pet-betta-fish.webp', '../assets/images/product-aquarium-kit.webp', '../assets/images/product-fish-food.webp'],
       about: 'Nemo is a lively clownfish suitable for a mature saltwater aquarium with stable water parameters.',
       personality: 'Active, bold, and fun to watch.',
       care: 'Maintain marine water quality, avoid overfeeding, and introduce tank mates carefully.'
@@ -409,7 +429,7 @@
       badgeClass: 'badge-dog',
       price: '$49.99',
       image: '../assets/images/product-dry-dog-food.webp',
-      thumbs: ['../assets/images/product-dry-dog-food.webp', '../assets/images/product-dog-food-kibble.webp', '../assets/images/product-dog-eating-food.webp', '../assets/images/product-dog-food-bowl.webp'],
+      thumbs: ['../assets/images/product-dry-dog-food.webp', '../assets/images/pet-puppy-playing-ball.webp', '../assets/images/pet-golden-retriever-puppy.webp', '../assets/images/product-dog-food-bowl.webp'],
       description: ['Complete dry dog food with quality protein and balanced nutrients for adult dogs.', 'Crunchy kibble supports daily feeding routines and helps keep mealtime simple.'],
       ingredients: 'Chicken meal, rice, poultry fat, vitamins, minerals, omega oils, and probiotics.',
       feeding: 'Feed according to your dog weight and activity level. Always provide fresh water.'
@@ -437,7 +457,7 @@
       badgeClass: 'badge-fish',
       price: '$89.99',
       image: '../assets/images/product-aquarium-kit.webp',
-      thumbs: ['../assets/images/product-aquarium-kit.webp', '../assets/images/pet-betta-fish.webp', '../assets/images/product-fish-food.webp', '../assets/images/product-aquarium-kit.webp'],
+      thumbs: ['../assets/images/product-aquarium-kit.webp', '../assets/images/pet-betta-fish.webp', '../assets/images/product-fish-food.webp'],
       description: ['A beginner-friendly aquarium kit with filtration and bright viewing.', 'Great for first-time fish keepers setting up a stable freshwater tank.'],
       ingredients: 'Glass tank, LED hood, filter, cartridge, setup guide, and water conditioner sample.',
       feeding: 'Cycle the tank before adding fish and test water regularly.'
@@ -507,7 +527,7 @@
       badgeClass: 'badge-fish',
       price: '$9.99',
       image: '../assets/images/product-fish-food.webp',
-      thumbs: ['../assets/images/product-fish-food.webp', '../assets/images/pet-betta-fish.webp', '../assets/images/product-aquarium-kit.webp', '../assets/images/product-fish-food.webp'],
+      thumbs: ['../assets/images/product-fish-food.webp', '../assets/images/pet-betta-fish.webp', '../assets/images/product-aquarium-kit.webp'],
       description: ['Daily flakes for tropical community fish with colour-supporting nutrition.', 'Easy to portion and suitable for most freshwater tanks.'],
       ingredients: 'Fish meal, shrimp meal, spirulina, yeast, vitamins, and minerals.',
       feeding: 'Feed only what fish consume in two minutes.'
@@ -810,7 +830,12 @@
 
     setImage(document.getElementById('galleryMain'), pet.image, pet.name + ' - ' + pet.breed);
     document.querySelectorAll('.product-thumbnails img').forEach(function (thumb, index) {
-      setImage(thumb, pet.thumbs[index] || pet.image, pet.name + ' photo ' + (index + 1));
+      if (pet.thumbs[index]) {
+        thumb.classList.remove('d-none');
+        setImage(thumb, pet.thumbs[index], pet.name + ' photo ' + (index + 1));
+      } else {
+        thumb.classList.add('d-none');
+      }
     });
 
     const headings = Array.from(document.querySelectorAll('h2.h4'));
@@ -849,9 +874,14 @@
 
     setImage(document.getElementById('galleryMain'), product.image, product.name);
     document.querySelectorAll('.product-thumbnails img').forEach(function (thumb, index) {
-      setImage(thumb, product.thumbs[index] || product.image, product.name + ' photo ' + (index + 1));
-      if (index === 0) thumb.classList.add('active');
-      else thumb.classList.remove('active');
+      if (product.thumbs[index]) {
+        thumb.classList.remove('d-none');
+        setImage(thumb, product.thumbs[index], product.name + ' photo ' + (index + 1));
+        if (index === 0) thumb.classList.add('active');
+        else thumb.classList.remove('active');
+      } else {
+        thumb.classList.add('d-none');
+      }
     });
 
     const optionLabel = document.querySelector('label[for="productSize"]');
@@ -991,9 +1021,43 @@
     }
   });
 
-  /* ---- Static Action Buttons ---- */
+  /* ---- Add to Cart ---- */
   document.querySelectorAll('.btn-add-cart').forEach(function (btn) {
     btn.addEventListener('click', function () {
+      if (currentPage === 'product-details.html' && window.PMOrders) {
+        const cartId = getParam('product') || 'dry-dog-food';
+        const product = PRODUCT_DETAIL_DATA[cartId] || PRODUCT_DETAIL_DATA['dry-dog-food'];
+        const sizeSelect = document.getElementById('productSize');
+        const qtyInputEl = document.getElementById('qtyInput');
+        const qty = Math.max(1, parseInt(qtyInputEl ? qtyInputEl.value : 1, 10) || 1);
+        const sizeLabel = (sizeSelect && sizeSelect.selectedOptions.length) ? sizeSelect.selectedOptions[0].textContent.trim() : '';
+        const priceNum = parseFloat(String(product.price).replace(/[^0-9.]/g, '')) || 0;
+
+        const cart = PMOrders.getCart();
+        const existing = cart.find(function (item) {
+          return item.id === cartId && item.size === sizeLabel;
+        });
+        if (existing) {
+          existing.quantity = (parseInt(existing.quantity, 10) || 0) + qty;
+        } else {
+          cart.push({
+            id: cartId,
+            name: product.name,
+            image: product.image,
+            price: priceNum,
+            size: sizeLabel,
+            quantity: qty
+          });
+        }
+        PMOrders.setCart(cart);
+        if (typeof window.updateCartBadge === 'function') {
+          window.updateCartBadge();
+        }
+        if (typeof window.pmToast === 'function') {
+          window.pmToast(qty + ' × ' + product.name + ' added to your cart.', 'success');
+        }
+      }
+
       const original = btn.innerHTML;
       btn.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i> Added!';
       btn.disabled = true;
