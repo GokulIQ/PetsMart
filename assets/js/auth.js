@@ -96,24 +96,6 @@
       });
     }
 
-    const hasCustomerDemo = users.some((u) => u.email === "demo@petsmart.com");
-    if (!hasCustomerDemo) {
-      const customerSalt = randomSalt();
-      const customerHash = await hashPassword("Demo@123", customerSalt);
-      users.push({
-        id: uid("usr"),
-        name: "Demo Customer",
-        email: "demo@petsmart.com",
-        salt: customerSalt,
-        hash: customerHash,
-        role: "customer",
-        status: "active",
-        createdAt: new Date().toISOString(),
-        phone: "",
-        address: "",
-      });
-    }
-
     if (!readJSON(USERS_KEY, null)) {
       writeJSON(USERS_KEY, users);
     } else if (!users.every((u) => readJSON(USERS_KEY, []).some((existing) => existing.id === u.id))) {

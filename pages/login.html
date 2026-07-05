@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Log in to your PetsMart account to track orders, manage your profile, and access the admin dashboard.">
+  <meta name="description" content="Admin login for PetsMart — manage products, orders, and store settings.">
   <title>Login — PetsMart Pet Shop</title>
   <link rel="canonical" href="https://www.petsmart-store.com/pages/login.html">
 
@@ -76,9 +76,9 @@
           <div class="col-lg-5 col-md-7">
             <div class="auth-card">
               <div class="text-center mb-4">
-                <span class="section-label">Welcome Back</span>
-                <h1 class="h2">Log In to PetsMart</h1>
-                <!-- <p class="text-muted">Access your orders, wishlist, and account settings.</p> -->
+                <span class="section-label">Admin Access</span>
+                <h1 class="h2">Admin Login</h1>
+                <p class="text-muted">Sign in to manage products, orders, and store settings.</p>
               </div>
 
               <div id="authAlert" class="alert d-none" role="alert"></div>
@@ -109,20 +109,19 @@
               </form>
 
               <div class="text-center my-4">
-                <span class="text-muted">or continue with a demo account</span>
+                <span class="text-muted">or continue as admin</span>
                 <div class="d-grid gap-2 mt-3">
                   <button type="button" class="btn-pet btn-pet-outline w-100 demo-login-btn" data-email="admin@petsmart.com" data-password="Admin@123">
-                    <i class="fas fa-user-shield" aria-hidden="true"></i> Continue as Admin Demo
-                  </button>
-                  <button type="button" class="btn-pet btn-pet-outline w-100 demo-login-btn" data-email="demo@petsmart.com" data-password="Demo@123">
-                    <i class="fas fa-user" aria-hidden="true"></i> Continue as Customer Demo
+                    <i class="fas fa-user-shield" aria-hidden="true"></i> Continue as Admin
                   </button>
                 </div>
               </div>
 
-              <p class="text-center mt-4 mb-0">
-                Want to try the full flow? <a href="register.html">Open the local demo register page</a>
-              </p>
+              <div class="alert alert-info text-center mb-0" role="note">
+                <strong>Default admin login</strong><br>
+                Email: <code>admin@petsmart.com</code><br>
+                Password: <code>Admin@123</code>
+              </div>
             </div>
           </div>
         </div>
@@ -251,9 +250,7 @@
           } catch (err) {
             showAlert(err.message, 'danger');
             button.disabled = false;
-            button.innerHTML = button.dataset.email === 'admin@petsmart.com'
-              ? '<i class="fas fa-user-shield"></i> Continue as Admin Demo'
-              : '<i class="fas fa-user"></i> Continue as Customer Demo';
+            button.innerHTML = '<i class="fas fa-user-shield"></i> Continue as Admin';
           }
         });
       });
