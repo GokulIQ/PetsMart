@@ -1186,6 +1186,17 @@
       }
     }
 
+    function applyPetTypeFromUrl() {
+      const petTypeParam = new URLSearchParams(window.location.search).get('pet-type');
+      if (!petTypeParam || !filterSidebar) {
+        return;
+      }
+      const petTypeInput = filterSidebar.querySelector('input[name="pet-type"][value="' + petTypeParam + '"]');
+      if (petTypeInput) {
+        petTypeInput.checked = true;
+      }
+    }
+
     if (applyFiltersBtn) {
       applyFiltersBtn.addEventListener('click', applyProductFilters);
     }
@@ -1197,6 +1208,7 @@
     }
 
     applyBrandFromUrl();
+    applyPetTypeFromUrl();
     applyProductFilters();
   }
 
