@@ -1128,6 +1128,96 @@
       return sorted;
     }
 
+    /* ---- Pagination ---- */
+    const PRODUCTS_PER_PAGE = 6;
+    const paginationNav = document.getElementById('productPagination');
+    const paginationList = document.getElementById('paginationList');
+    let currentPage = 1;
+    let lastSortedVisible = [];
+
+    function renderPagination(totalItems) {
+      if (!paginationNav || !paginationList) {
+        return;
+      }
+      const totalPages = Math.max(1, Math.ceil(totalItems / PRODUCTS_PER_PAGE));
+      if (currentPage > totalPages) {
+        currentPage = totalPages;
+      }
+
+      if (totalItems === 0 || totalPages <= 1) {
+        paginationNav.classList.add('d-none');
+        return;
+      }
+      paginationNav.classList.remove('d-none');
+
+      const parts = [];
+      parts.push(
+        '<li class="page-item' + (currentPage === 1 ? ' disabled' : '') + '">' +
+        '<a class="page-link" href="#" data-page="prev" aria-label="Previous page"' +
+        (currentPage === 1 ? ' tabindex="-1"' : '') + '>' +
+        '<i class="fas fa-chevron-left" aria-hidden="true"></i></a></li>'
+      );
+      for (let i = 1; i <= totalPages; i++) {
+        parts.push(
+          '<li class="page-item' + (i === currentPage ? ' active' : '') + '"' +
+          (i === currentPage ? ' aria-current="page"' : '') + '>' +
+          '<a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>'
+        );
+      }
+      parts.push(
+        '<li class="page-item' + (currentPage === totalPages ? ' disabled' : '') + '">' +
+        '<a class="page-link" href="#" data-page="next" aria-label="Next page"' +
+        (currentPage === totalPages ? ' tabindex="-1"' : '') + '>' +
+        '<i class="fas fa-chevron-right" aria-hidden="true"></i></a></li>'
+      );
+
+      paginationList.innerHTML = parts.join('');
+    }
+
+    function showPage() {
+      const totalPages = Math.max(1, Math.ceil(lastSortedVisible.length / PRODUCTS_PER_PAGE));
+      if (currentPage > totalPages) {
+        currentPage = totalPages;
+      }
+      const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
+      const end = start + PRODUCTS_PER_PAGE;
+
+      lastSortedVisible.forEach(function (item, index) {
+        const onPage = index >= start && index < end;
+        item.classList.toggle('d-none', !onPage);
+      });
+
+      renderPagination(lastSortedVisible.length);
+    }
+
+    function goToPage(pageAttr) {
+      const totalPages = Math.max(1, Math.ceil(lastSortedVisible.length / PRODUCTS_PER_PAGE));
+      if (pageAttr === 'prev') {
+        currentPage = Math.max(1, currentPage - 1);
+      } else if (pageAttr === 'next') {
+        currentPage = Math.min(totalPages, currentPage + 1);
+      } else {
+        currentPage = Math.min(totalPages, Math.max(1, parseInt(pageAttr, 10) || 1));
+      }
+      showPage();
+      productGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    if (paginationList) {
+      paginationList.addEventListener('click', function (e) {
+        const link = e.target.closest('[data-page]');
+        if (!link) {
+          return;
+        }
+        e.preventDefault();
+        const pageItem = link.closest('.page-item');
+        if (pageItem && pageItem.classList.contains('disabled')) {
+          return;
+        }
+        goToPage(link.dataset.page);
+      });
+    }
+
     function applyProductFilters() {
       const filters = {
         petTypes: getCheckedValues('pet-type'),
@@ -1157,6 +1247,10 @@
       if (productEmpty) {
         productEmpty.classList.toggle('d-none', visible.length > 0);
       }
+
+      lastSortedVisible = sortedVisible;
+      currentPage = 1;
+      showPage();
     }
 
     function clearProductFilters() {
