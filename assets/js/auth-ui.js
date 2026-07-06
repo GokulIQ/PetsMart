@@ -25,29 +25,18 @@ document.addEventListener('DOMContentLoaded', async function () {
   if (navAuthLink) {
     const session = PMAuth.getSession();
     if (session) {
-      const label = session.role === 'admin' ? session.name.split(' ')[0] : 'My Account';
-      navAuthLink.innerHTML = `<i class="fas fa-user-circle" aria-hidden="true"></i> ${label}`;
-      navAuthLink.href = session.role === 'admin' ? 'admin.html' : 'my-orders.html?view=account';
-      navAuthLink.setAttribute('title', `Logged in as ${session.name} (${session.email})`);
+      // Admins browsing the public storefront shouldn't see a link that
+      // jumps them into the admin dashboard — just hide the login button
+      // and leave the logout button so they can sign out from anywhere.
+      navAuthLink.classList.add('d-none');
 
-      if (session.role !== 'admin') {
-        if (!document.getElementById('navOrdersLink')) {
-          const ordersLink = document.createElement('a');
-          ordersLink.id = 'navOrdersLink';
-          ordersLink.href = 'my-orders.html?view=orders';
-          ordersLink.className = 'btn-pet btn-pet-outline btn-pet-sm me-2';
-          ordersLink.innerHTML = '<i class="fas fa-box" aria-hidden="true"></i> My Orders';
-          navAuthLink.insertAdjacentElement('beforebegin', ordersLink);
-        }
-      }
-
-      // Add a logout button next to it if not already present
+      // Add a logout button if not already present
       if (!document.getElementById('navLogoutBtn')) {
         const logoutBtn = document.createElement('button');
         logoutBtn.type = 'button';
         logoutBtn.id = 'navLogoutBtn';
-        logoutBtn.className = 'btn-pet btn-pet-outline btn-pet-sm ms-2';
-        logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt" aria-hidden="true"></i>';
+        logoutBtn.className = 'btn-pet btn-pet-outline btn-pet-sm me-2';
+        logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt" aria-hidden="true"></i> Log Out';
         logoutBtn.setAttribute('aria-label', 'Log out');
         logoutBtn.addEventListener('click', function () {
           PMAuth.logout();

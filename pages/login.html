@@ -108,16 +108,7 @@
                 </div>
               </form>
 
-              <div class="text-center my-4">
-                <span class="text-muted">or continue as admin</span>
-                <div class="d-grid gap-2 mt-3">
-                  <button type="button" class="btn-pet btn-pet-outline w-100 demo-login-btn" data-email="admin@petsmart.com" data-password="Admin@123">
-                    <i class="fas fa-user-shield" aria-hidden="true"></i> Continue as Admin
-                  </button>
-                </div>
-              </div>
-
-              <div class="alert alert-info text-center mb-0" role="note">
+              <div class="alert alert-info text-center mt-4 mb-0" role="note">
                 <strong>Default admin login</strong><br>
                 Email: <code>admin@petsmart.com</code><br>
                 Password: <code>Admin@123</code>
@@ -226,33 +217,6 @@
           submitBtn.disabled = false;
           submitBtn.innerHTML = originalHtml;
         }
-      });
-
-      document.querySelectorAll('.demo-login-btn').forEach(function (button) {
-        button.addEventListener('click', async function () {
-          const email = button.dataset.email;
-          const password = button.dataset.password;
-          button.disabled = true;
-          button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
-
-          try {
-            const user = await PMAuth.login({ email, password, remember: true });
-            showAlert(`Welcome back, ${user.name}! Redirecting...`, 'success');
-            const params = new URLSearchParams(window.location.search);
-            const next = params.get('next');
-            setTimeout(function () {
-              if (user.role === 'admin') {
-                window.location.href = 'admin.html';
-              } else {
-                window.location.href = (next && next !== 'login.html') ? next : 'index.html';
-              }
-            }, 700);
-          } catch (err) {
-            showAlert(err.message, 'danger');
-            button.disabled = false;
-            button.innerHTML = '<i class="fas fa-user-shield"></i> Continue as Admin';
-          }
-        });
       });
     });
   </script>
